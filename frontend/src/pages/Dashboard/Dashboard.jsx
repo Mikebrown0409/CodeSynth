@@ -52,6 +52,14 @@ export default function Dashboard() {
                 </div>
               ))}
           </div>
+          {selectedFile && fileContent && (
+            <div className="file-content">
+              <h3>{selectedFile.name}</h3>
+              <pre>
+                <code>{fileContent.content}</code>
+              </pre>
+            </div>
+          )}
         </div>
       )}
     </div>
