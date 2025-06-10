@@ -11,7 +11,7 @@ export default function NavBar({ user, setUser }) {
   }
   return (
     <nav className="NavBar">
-      <NavLink to="/">Home</NavLink>
+      <NavLink to="/">Dashboard</NavLink>
       &nbsp; | &nbsp;
       {user ? (
         <>
