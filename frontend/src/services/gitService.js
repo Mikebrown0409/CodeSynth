@@ -13,3 +13,6 @@ export async function create(postData) {
 export async function analyzeRepo({ owner, repo }) {
   return sendRequest(`${BASE_URL}analyze`, "POST", { owner, repo });
 }
+export async function getFileContent({ owner, repo, path }) {
+  return sendRequest(`${BASE_URL}content`, "POST", { owner, repo, path });
+}

@@ -1,5 +1,6 @@
 const githubService = require("../services/githubService");
 
+// basically index
 async function analyzeRepository(req, res) {
   try {
     const { owner, repo } = req.body;
@@ -23,7 +24,18 @@ async function analyzeRepository(req, res) {
     res.status(500).json({ error: "Failed to analyze repository" });
   }
 }
+async function getFileContent(req, res) {
+  try {
+    const { owner, repo, path } = req.body;
+    const content = await githubService.getFileContent(owner, repo, path);
+    res.json({ content });
+  } catch (err) {
+    console.error(" Error fetching file details:", err);
+    res.status(500).json({ error: "Failed to fetch the file content" });
+  }
+}
 
 module.exports = {
   analyzeRepository,
+  getFileContent,
 };

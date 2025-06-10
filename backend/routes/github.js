@@ -11,4 +11,7 @@ router.use(ensureLoggedIn);
 // POST /api/github/analyze - Analyze a repository
 router.post("/analyze", githubCtrl.analyzeRepository);
 
+// POST /api/github/content - Analyze repository files
+router.post("/content", githubCtrl.getFileContent);
+
 module.exports = router;

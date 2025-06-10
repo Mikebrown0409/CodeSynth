@@ -1,7 +1,7 @@
 import { useState } from "react";
 import * as gitService from "../../services/gitService";
 
-export default function RepoAnalyzer() {
+export default function RepoAnalyzer({ onAnalyze }) {
   const [repoUrl, setRepoUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -14,7 +14,8 @@ export default function RepoAnalyzer() {
       const url = new URL(repoUrl);
       const [, owner, repo] = url.pathname.split("/");
       const response = await gitService.analyzeRepo({ owner, repo });
-      console.log(response); // For testing, later we'll display this data
+      console.log(response); // for development/testing, need to remove later on.
+      onAnalyze(response);
     } catch (err) {
       setError(err.message);
     } finally {
