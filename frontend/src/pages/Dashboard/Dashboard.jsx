@@ -1,13 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RepoAnalyzer from "../../components/RepoAnalyzer/RepoAnalyzer";
 import * as gitService from "../../services/gitService";
 import "./dashboard.css";
 
 export default function Dashboard() {
+  const [repos, setRepos] = useState([]);
   const [repoData, setRepoData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadUserRepos() {
+      try {
+        const userRepos = await gitService.index();
+        setRepos(userRepos);
+      } catch (err) {
+        setError("Failed to load repositories.");
+      }
+    }
+    loadUserRepos();
+  }, []);
+
+  async function handleRepoClick(repo) {
+    try {
+      console.log("Clicked repo:", repo); // Debug log
+
+      // Parse URL more reliably
+      const url = new URL(repo.repo_url);
+      const pathParts = url.pathname.split("/");
+      // GitHub URLs are structured as github.com/owner/repo
+      const owner = pathParts[1];
+      const repoName = pathParts[2];
+
+      console.log("Attempting analysis with:", { owner, repoName }); // Debug log
+
+      const analysis = await gitService.analyzeRepo({ owner, repoName });
+      console.log("Analysis result:", analysis); // Debug log
+
+      setRepoData(analysis);
+    } catch (err) {
+      console.error("Analysis error:", err); // More detailed error
+      setError(`Failed to analyze repository: ${err.message}`);
+    }
+  }
 
   async function handleAnalysis(data) {
     setRepoData(data);
@@ -30,6 +66,41 @@ export default function Dashboard() {
   }
   return (
     <div className="dashboard-container">
+      <div className="user-repos">
+        <h2>Your Repositories</h2>
+        {repos.length > 0 ? (
+          <ul className="repo-list">
+            {repos.map((repo) => (
+              <li
+                key={repo._id}
+                className="repo-item"
+                onClick={() => handleRepoClick(repo)}
+              >
+                <h3>{repo.repo_name}</h3>
+                <p>
+                  Last analyzed:{" "}
+                  {new Date(repo.lastAnalyzed).toLocaleDateString()}
+                </p>
+                <div className="repo-meta">
+                  <span>{repo.isPublic ? "Public" : "Private"}</span>
+                  <a
+                    href={repo.repo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on GitHub
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>
+            No repositories analyzed yet. Use the analyzer above to add one.
+          </p>
+        )}
+      </div>
+
       <RepoAnalyzer onAnalyze={handleAnalysis} />
       {error && <div className="error-message">{error}</div>}
 

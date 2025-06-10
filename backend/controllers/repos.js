@@ -1,4 +1,17 @@
 const githubService = require("../services/githubService");
+const Repo = require("../models/repo");
+
+async function index(req, res) {
+  try {
+    const repo = await Repo.find({ user: req.user._id });
+    // .populate("owner");
+    // .populate("comments.author");
+    res.json(repo);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Failed to fetch repositories" });
+  }
+}
 
 // basically index
 async function analyzeRepository(req, res) {
@@ -14,10 +27,26 @@ async function analyzeRepository(req, res) {
     // Get linting issues
     const lintingIssues = await githubService.getLintingIssues(owner, repo);
 
+    // Save to database
+    const savedRepo = await Repo.findOneAndUpdate(
+      { repo_id: repoData.id.toString() },
+      {
+        repo_id: repoData.id.toString(),
+        repo_url: repoData.html_url,
+        repo_name: repoData.name,
+        githubId: repoData.id.toString(),
+        user: req.user._id,
+        isPublic: !repoData.private,
+        lastAnalyzed: new Date(),
+      },
+      { new: true, upsert: true }
+    );
+
     res.json({
       repository: repoData,
       contents,
       lintingIssues,
+      savedRepo,
     });
   } catch (error) {
     console.error("Error analyzing repository:", error);
@@ -36,6 +65,7 @@ async function getFileContent(req, res) {
 }
 
 module.exports = {
+  index,
   analyzeRepository,
   getFileContent,
 };

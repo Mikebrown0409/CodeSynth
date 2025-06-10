@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const GitSchema = new Schema(
+const RepoSchema = new Schema(
   {
-    owner: { type: String, required: true },
-    name: { type: String, required: true },
-    fullName: { type: String, required: true },
+    repo_id: { type: String, required: true, unique: true, trim: true },
+    repo_url: { type: String, required: true },
+    repo_name: { type: String, required: true, trim: true },
     githubId: { type: String, required: true },
     user: {
       type: Schema.Types.ObjectId,
@@ -20,4 +20,4 @@ const GitSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model("Git", GitSchema);
+module.exports = mongoose.model("Repo", RepoSchema);
