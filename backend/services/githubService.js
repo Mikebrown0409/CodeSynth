@@ -45,6 +45,21 @@ async function getRepositoryContents(owner, repo, path = "") {
   }
 }
 
+async function getFileContent(owner, repo, path) {
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+    });
+    // GitHub returns content as base64
+    return Buffer.from(data.content, "base64").toString();
+  } catch (error) {
+    console.error("Error fetching file content:", error);
+    throw error;
+  }
+}
+
 /**
  * Get repository issues with linting/eslint labels
  * @param {string} owner - Repository owner
@@ -69,5 +84,6 @@ async function getLintingIssues(owner, repo) {
 module.exports = {
   getRepository,
   getRepositoryContents,
+  getFileContent,
   getLintingIssues,
 };
