@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const githubCtrl = require("../controllers/githubController");
+const githubCtrl = require("../controllers/gits");
 const ensureLoggedIn = require("../middleware/ensureLoggedIn");
 
 // All paths are prefixed with /api/github

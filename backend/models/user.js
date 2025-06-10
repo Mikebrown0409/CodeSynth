@@ -21,7 +21,7 @@ const userSchema = new Schema(
     repositories: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Repo",
+        ref: "Git",
       },
     ],
   },
