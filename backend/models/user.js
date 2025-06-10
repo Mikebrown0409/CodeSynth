@@ -18,6 +18,12 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    repositories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Repo",
+      },
+    ],
   },
   {
     timestamps: true,
