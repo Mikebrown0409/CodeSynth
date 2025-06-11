@@ -1,6 +1,7 @@
 const githubService = require("../services/githubService");
 const Repo = require("../models/repo");
 
+// INDEX
 async function index(req, res) {
   try {
     const repo = await Repo.find({ user: req.user._id });
@@ -13,7 +14,6 @@ async function index(req, res) {
   }
 }
 
-// basically index
 async function analyzeRepository(req, res) {
   try {
     const { owner, repo } = req.body;

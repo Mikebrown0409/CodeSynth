@@ -8,6 +8,7 @@ import SignUpPage from "../SignUpPage/SignUpPage";
 import LogInPage from "../LogInPage/LogInPage";
 import NavBar from "../../components/NavBar/NavBar";
 import Dashboard from "../Dashboard/Dashboard";
+
 import "./App.css";
 
 export default function App() {

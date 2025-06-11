@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import RepoAnalyzer from "../../components/RepoAnalyzer/RepoAnalyzer";
 import * as gitService from "../../services/gitService";
+import MarkdownPreview from '../../components/MarkdownPreview/MarkdownPreview';
 import "./dashboard.css";
 
 export default function Dashboard() {
@@ -76,7 +77,7 @@ export default function Dashboard() {
                 className="repo-item"
                 onClick={() => handleRepoClick(repo)}
               >
-                <h3>{repo.repo_name}</h3>
+                <h3 href={repo.repo_name}>Repo: {repo.repo_name}</h3>
                 <p>
                   Last analyzed:{" "}
                   {new Date(repo.lastAnalyzed).toLocaleDateString()}
@@ -126,9 +127,13 @@ export default function Dashboard() {
           {selectedFile && fileContent && (
             <div className="file-content">
               <h3>{selectedFile.name}</h3>
-              <pre>
-                <code>{fileContent.content}</code>
-              </pre>
+              {selectedFile.name.endsWith('.md') ? (
+                <MarkdownPreview markdown={fileContent.content} />
+              ) : (
+                <pre>
+                  <code>{fileContent.content}</code>
+                </pre>
+              )}
             </div>
           )}
         </div>
