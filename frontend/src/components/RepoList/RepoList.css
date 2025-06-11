@@ -1,0 +1,15 @@
+.repo {
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e1e4e8;
+  font-size: 14px;
+}
+
+.repo-item {
+  color: rgb(44, 4, 147);
+  cursor: pointer;
+}
+
+.repo-item:hover {
+  text-decoration: underline;
+}

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import RepoAnalyzer from "../../components/RepoAnalyzer/RepoAnalyzer";
+import FileTree from "../../components/FileTree/FileTree";
+import FileContent from "../../components/FileContent/FileContent";
+import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
-import MarkdownPreview from "../../components/MarkdownPreview/MarkdownPreview";
 import "./dashboard.css";
 
 export default function Dashboard() {
@@ -101,65 +103,12 @@ export default function Dashboard() {
       setError("Failed to navigate to directory");
     }
   }
-  function renderBreadcrumbs() {
-    if (!currentPath) return null;
-
-    const parts = currentPath.split("/");
-    return (
-      <div className="breadcrumbs">
-        <span onClick={() => handlePathClick("")}>root</span>
-        {parts.map((part, index) => (
-          <span key={index}>
-            {" / "}
-            <span
-              onClick={() =>
-                handlePathClick(parts.slice(0, index + 1).join("/"))
-              }
-              className="breadcrumb-item"
-            >
-              {part}
-            </span>
-          </span>
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="dashboard-container">
       <div className="user-repos">
         <h2>Your Repositories</h2>
-        {repos.length > 0 ? (
-          <ul className="repo-list">
-            {repos.map((repo) => (
-              <li
-                key={repo._id}
-                className="repo-item"
-                onClick={() => handleRepoClick(repo)}
-              >
-                <h3 href={repo.repo_name}>{repo.repo_name}</h3>
-                <p>
-                  Last analyzed:{" "}
-                  {new Date(repo.lastAnalyzed).toLocaleDateString()}
-                </p>
-                <div className="repo-meta">
-                  <span>{repo.isPublic ? "Public" : "Private"}</span>
-                  <a
-                    href={repo.repo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View on GitHub
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>
-            No repositories analyzed yet. Use the analyzer above to add one.
-          </p>
-        )}
+        <RepoList repos={repos} onRepoClick={handleRepoClick} />
       </div>
 
       <RepoAnalyzer onAnalyze={handleAnalysis} />
@@ -167,37 +116,13 @@ export default function Dashboard() {
 
       {repoData && (
         <div className="repo-content">
-          <div className="file-tree">
-            <h3>Files</h3>
-            {renderBreadcrumbs()}
-            {Array.isArray(repoData.contents) &&
-              repoData.contents.map((item) => (
-                <div
-                  key={item.sha || item.path}
-                  className={`file-item ${
-                    item.type === "dir" ? "directory" : "file"
-                  }`}
-                  onClick={() => handleFileSelect(item)}
-                >
-                  <span className="item-icon">
-                    {item.type === "dir" ? "folder: " : "file:"}
-                  </span>
-                  {item.name}
-                </div>
-              ))}
-          </div>
-          {selectedFile && fileContent && (
-            <div className="file-content">
-              <h3>{selectedFile.name}</h3>
-              {selectedFile.name.endsWith(".md") ? (
-                <MarkdownPreview markdown={fileContent.content} />
-              ) : (
-                <pre>
-                  <code>{fileContent.content}</code>
-                </pre>
-              )}
-            </div>
-          )}
+          <FileTree
+            contents={repoData.contents}
+            currentPath={currentPath}
+            onFileSelect={handleFileSelect}
+            onPathClick={handlePathClick}
+          />
+          <FileContent file={selectedFile} content={fileContent} />
         </div>
       )}
     </div>
