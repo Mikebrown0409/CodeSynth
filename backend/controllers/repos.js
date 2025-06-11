@@ -57,7 +57,7 @@ async function getFileContent(req, res) {
   try {
     const { owner, repo, path } = req.body;
     const content = await githubService.getFileContent(owner, repo, path);
-    res.json({ content });
+    res.json(content);
   } catch (err) {
     console.error(" Error fetching file details:", err);
     res.status(500).json({ error: "Failed to fetch the file content" });

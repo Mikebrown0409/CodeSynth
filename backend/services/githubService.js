@@ -52,10 +52,21 @@ async function getFileContent(owner, repo, path) {
       repo,
       path,
     });
-    // GitHub returns content as base64
-    return Buffer.from(data.content, "base64").toString();
+    // If data is an array, it's a directory listing
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // If it's a file, decode the content
+    if (data.content) {
+      return {
+        content: Buffer.from(data.content, "base64").toString(),
+      };
+    }
+
+    throw new Error("Unsupported content type");
   } catch (error) {
-    console.error("Error fetching file content:", error);
+    console.error("Error fetching content:", error);
     throw error;
   }
 }
