@@ -1,0 +1,40 @@
+.lint-results {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #d73a49;
+}
+
+.lint-issue {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.lint-issue.error {
+  border-left: 3px solid #d73a49;
+}
+
+.lint-issue.warning {
+  border-left: 3px solid #f1c40f;
+}
+
+.line-number {
+  font-weight: bold;
+  margin-right: 1rem;
+  color: #586069;
+}
+
+.rule-id {
+  color: #6a737d;
+  font-size: 0.9em;
+  margin-left: 0.5rem;
+}
+
+.code-container {
+  margin-top: 1rem;
+  border-radius: 4px;
+  overflow: hidden;
+}

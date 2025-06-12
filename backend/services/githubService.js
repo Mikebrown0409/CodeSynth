@@ -1,9 +1,13 @@
 const { Octokit } = require("@octokit/rest");
+const { ESLint } = require("eslint");
 
 // Initialize Octokit with auth token from environment variables
 const octokit = new Octokit({
   auth: process.env.GITHUB_ACCESS_TOKEN,
 });
+
+// Initialize ESLint - flat config format
+const eslint = new ESLint();
 
 /**
  * Get repository details
@@ -52,6 +56,7 @@ async function getFileContent(owner, repo, path) {
       repo,
       path,
     });
+
     // If data is an array, it's a directory listing
     if (Array.isArray(data)) {
       return data;
@@ -59,8 +64,22 @@ async function getFileContent(owner, repo, path) {
 
     // If it's a file, decode the content
     if (data.content) {
+      const content = Buffer.from(data.content, "base64").toString();
+      let lintResults = [];
+
+      // Check if file is JavaScript/JSX
+      if (path.match(/\.(js|jsx)$/)) {
+        console.log(`🔍 Linting ${path}...`);
+        const results = await eslint.lintText(content, {
+          filePath: path,
+        });
+        lintResults = results[0].messages;
+        console.log("Lint results:", lintResults);
+      }
+
       return {
-        content: Buffer.from(data.content, "base64").toString(),
+        content,
+        lintResults,
       };
     }
 

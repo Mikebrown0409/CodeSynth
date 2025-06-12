@@ -75,13 +75,13 @@ export default function Dashboard() {
     } else {
       // Handle file click
       try {
-        const content = await gitService.getFileContent({
+        const response = await gitService.getFileContent({
           owner: repoData.repository.owner.login,
           repo: repoData.repository.name,
           path: item.path,
         });
         setSelectedFile(item);
-        setFileContent(content);
+        setFileContent(response);
       } catch (err) {
         setError("Failed to fetch file content");
       }

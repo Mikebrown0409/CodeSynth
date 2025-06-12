@@ -56,11 +56,21 @@ async function analyzeRepository(req, res) {
 async function getFileContent(req, res) {
   try {
     const { owner, repo, path } = req.body;
-    const content = await githubService.getFileContent(owner, repo, path);
-    res.json(content);
+    const result = await githubService.getFileContent(owner, repo, path);
+
+    // bugged out without the change, need for breadcrumbs/file path
+    // If result is an array, it's directory contents
+    if (Array.isArray(result)) {
+      res.json(result);
+      return;
+    }
+
+    // If it's a file, destructured to send content and lint results
+    const { content, lintResults } = result;
+    res.json({ content, lintResults });
   } catch (err) {
-    console.error(" Error fetching file details:", err);
-    res.status(500).json({ error: "Failed to fetch the file content" });
+    console.error("Error fetching content:", err);
+    res.status(500).json({ error: "Failed to fetch content" });
   }
 }
 
