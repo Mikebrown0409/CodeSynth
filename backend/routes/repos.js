@@ -8,13 +8,16 @@ const ensureLoggedIn = require("../middleware/ensureLoggedIn");
 // Protect all routes
 router.use(ensureLoggedIn);
 
-// GET /api/repo (INDEX)
+// GET /api/repos (INDEX)
 router.get("/", repoCtrl.index);
 
-// POST /api/repo/analyze - Analyze a repository
+// DELETE /api/repos/:id
+router.delete("/:id", repoCtrl.deleteRepo);
+
+// POST /api/repos/analyze - Analyze a repository
 router.post("/analyze", repoCtrl.analyzeRepository);
 
-// POST /api/repo/content - Analyze repository files
+// POST /api/repos/content - Analyze repository files
 router.post("/content", repoCtrl.getFileContent);
 
 module.exports = router;

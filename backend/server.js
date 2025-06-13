@@ -24,7 +24,7 @@ app.use(require("./middleware/checkToken"));
 // API Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/posts", require("./routes/posts"));
-app.use("/api/repo", require("./routes/repo"));
+app.use("/api/repos", require("./routes/repos"));
 
 // Use a "catch-all" route to deliver the frontend's production index.html
 app.get("/*splat", function (req, res) {

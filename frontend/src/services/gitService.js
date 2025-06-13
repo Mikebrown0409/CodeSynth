@@ -1,6 +1,6 @@
 import sendRequest from "./sendRequest";
 
-const BASE_URL = "/api/repo/";
+const BASE_URL = "/api/repos/";
 
 export async function index() {
   return sendRequest(BASE_URL);
@@ -8,6 +8,10 @@ export async function index() {
 
 export async function create(postData) {
   return sendRequest(BASE_URL, "POST", postData);
+}
+
+export async function deleteRepo(repoId) {
+  return sendRequest(`${BASE_URL}${repoId}`, "DELETE");
 }
 
 export async function analyzeRepo({ owner, repoName }) {

@@ -1,6 +1,6 @@
 import "./RepoList.css";
 
-export default function RepoList({ repos, onRepoClick }) {
+export default function RepoList({ repos, onRepoClick, onDeleteClick }) {
   if (!repos.length) {
     return (
       <p>No repositories analyzed yet. Add a repository to get started.</p>
@@ -10,14 +10,17 @@ export default function RepoList({ repos, onRepoClick }) {
   return (
     <ul className="repo-list">
       {repos.map((repo) => (
-        <li key={repo._id} onClick={() => onRepoClick(repo)}>
-          <h3 className="repo-item">{repo.repo_name}</h3>
-          <p>
-            Last analyzed: {new Date(repo.lastAnalyzed).toLocaleDateString()}
-          </p>
-          <div className="repo-meta">
-            <span>{repo.isPublic ? "Public" : "Private"}</span>
-          </div>
+        <li key={repo._id} className="repo-item">
+          <div onClick={() => onRepoClick(repo)}>{repo.repo_name}</div>
+          <button
+            className="delete-btn"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent repo click
+              onDeleteClick(repo._id);
+            }}
+          >
+            Delete
+          </button>
         </li>
       ))}
     </ul>

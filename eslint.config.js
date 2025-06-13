@@ -1,33 +1,53 @@
-// module.exports = [
-//   {
-//     languageOptions: {
-//       ecmaVersion: 2022,
-//       sourceType: "commonjs",
-//       parserOptions: {
-//         ecmaFeatures: {
-//           jsx: true,
-//         },
-//       },
-//       globals: {
-//         // Node.js globals
-//         require: true,
-//         process: true,
-//         module: true,
-//         __dirname: true,
-//         __filename: true,
-//         exports: true,
-//         Buffer: true,
-//         console: true,
-//         // Browser globals
-//         window: true,
-//         document: true,
-//       },
-//     },
-//     rules: {
-//       "no-unused-vars": "warn",
-//       "no-console": "warn",
-//       "no-undef": "error",
-//       semi: ["warn", "always"],
-//     },
-//   },
-// ];
+module.exports = [
+  {
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        require: "readonly",
+        module: "readonly",
+        process: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        Buffer: "readonly",
+        window: "readonly",
+        document: "readonly",
+        jest: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        expect: "readonly",
+      },
+    },
+
+    rules: {
+      "no-undef": "error",
+      "no-unused-vars": [
+        "warn",
+        { args: "after-used", ignoreRestSiblings: true },
+      ],
+      "no-console": "warn",
+      "no-debugger": "warn",
+      eqeqeq: ["error", "smart"],
+      curly: ["error", "multi-line", "consistent"],
+
+      /* Best Practices / Modern JS */
+      "consistent-return": "error",
+      "arrow-body-style": ["warn", "as-needed"],
+      "prefer-const": "warn",
+      "no-var": "error",
+
+      /* Stylistic */
+      semi: ["error", "always"],
+      quotes: ["error", "single", { avoidEscape: true }],
+      indent: ["error", 2, { SwitchCase: 1 }],
+      "max-len": ["warn", { code: 100, ignoreUrls: true, ignoreStrings: true }],
+    },
+  },
+];
+
+// Needed if we add back to file for react plugin
+// overrideConfigFile: true,
+// overrideConfig:

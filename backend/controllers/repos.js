@@ -14,6 +14,7 @@ async function index(req, res) {
   }
 }
 
+// ANALYZE (Create/Show)
 async function analyzeRepository(req, res) {
   try {
     const { owner, repo } = req.body;
@@ -82,8 +83,30 @@ async function getFileContent(req, res) {
   }
 }
 
+// DELETE
+async function deleteRepo(req, res) {
+  try {
+    const repoId = req.params.id;
+
+    const repo = await Repo.findOneAndDelete({
+      _id: repoId,
+      user: req.user._id,
+    });
+
+    if (!repo) {
+      return res.status(404).json({ error: "Repository not found" });
+    }
+
+    res.json({ message: "Repository deleted successfully", repo });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Failed to delete repository" });
+  }
+}
+
 module.exports = {
   index,
   analyzeRepository,
   getFileContent,
+  deleteRepo,
 };

@@ -104,11 +104,32 @@ export default function Dashboard() {
     }
   }
 
+  async function handleDeleteClick(repoId) {
+    try {
+      await gitService.deleteRepo(repoId);
+      // Remove the deleted repo from state
+      setRepos(repos.filter((repo) => repo._id !== repoId));
+      // Clear repo data
+      if (repoData && repoData.savedRepo._id === repoId) {
+        setRepoData(null);
+        setSelectedFile(null);
+        setFileContent(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete repo:", err);
+      setError("Failed to delete repository");
+    }
+  }
+
   return (
     <div className="dashboard-container">
       <div className="user-repos">
         <h2>Your Repositories</h2>
-        <RepoList repos={repos} onRepoClick={handleRepoClick} />
+        <RepoList
+          repos={repos}
+          onRepoClick={handleRepoClick}
+          onDeleteClick={handleDeleteClick}
+        />
       </div>
 
       <RepoAnalyzer onAnalyze={handleAnalysis} />
