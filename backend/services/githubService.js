@@ -17,13 +17,23 @@ const eslint = new ESLint();
  */
 async function getRepository(owner, repo) {
   try {
-    const { data } = await octokit.repos.get({
+    if (!owner || !repo) {
+      throw new Error("Both owner and repository name are required");
+    }
+
+    const response = await octokit.rest.repos.get({
       owner,
       repo,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
     });
-    return data;
+
+    return response.data;
   } catch (error) {
-    console.error("Error fetching repository:", error);
+    if (error.status === 404) {
+      throw new Error(`Repository not found: ${owner}/${repo}`);
+    }
     throw error;
   }
 }

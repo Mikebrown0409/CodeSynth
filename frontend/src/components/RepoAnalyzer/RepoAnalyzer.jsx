@@ -9,15 +9,22 @@ export default function RepoAnalyzer({ onAnalyze }) {
   async function handleAnalyze(e) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       const url = new URL(repoUrl);
-      const [, owner, repo] = url.pathname.split("/");
-      const response = await gitService.analyzeRepo({ owner, repo });
-      console.log(response); // for development/testing, need to remove later on.
+      const pathParts = url.pathname.split("/").filter(Boolean);
+
+      if (pathParts.length !== 2) {
+        throw new Error("Invalid repository URL format");
+      }
+
+      const [owner, repoName] = pathParts;
+      const response = await gitService.analyzeRepo({ owner, repoName });
       onAnalyze(response);
     } catch (err) {
       setError(err.message);
+      console.error("Analysis error:", err);
     } finally {
       setLoading(false);
     }
@@ -39,6 +46,14 @@ export default function RepoAnalyzer({ onAnalyze }) {
             {loading ? "Analyzing..." : "Analyze"}
           </button>
         </form>
+        {error && (
+          <div
+            className="error-message"
+            style={{ color: "red", marginTop: "10px" }}
+          >
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

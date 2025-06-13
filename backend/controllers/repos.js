@@ -18,6 +18,12 @@ async function analyzeRepository(req, res) {
   try {
     const { owner, repo } = req.body;
 
+    if (!owner || !repo) {
+      return res.status(400).json({
+        error: "Missing required parameters: owner and repo name required",
+      });
+    }
+
     // Get basic repository info
     const repoData = await githubService.getRepository(owner, repo);
 
@@ -49,8 +55,10 @@ async function analyzeRepository(req, res) {
       savedRepo,
     });
   } catch (error) {
-    console.error("Error analyzing repository:", error);
-    res.status(500).json({ error: "Failed to analyze repository" });
+    console.error("Repository analysis error:", error);
+    res.status(error.status || 500).json({
+      error: error.message || "Failed to analyze repository",
+    });
   }
 }
 async function getFileContent(req, res) {
