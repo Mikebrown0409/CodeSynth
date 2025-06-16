@@ -20,4 +20,7 @@ router.post("/analyze", repoCtrl.analyzeRepository);
 // POST /api/repos/content - Analyze repository files
 router.post("/content", repoCtrl.getFileContent);
 
+// POST /api/repos/fix - Return auto-fixed code for a file
+router.post("/fix", repoCtrl.fixFile);
+
 module.exports = router;

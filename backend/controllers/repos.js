@@ -134,9 +134,25 @@ async function deleteRepo(req, res) {
   }
 }
 
+async function fixFile(req, res) {
+  try {
+    const { owner, repo, path } = req.body;
+    if (!owner || !repo || !path) {
+      return res.status(400).json({ error: "owner, repo and path are required" });
+    }
+
+    const result = await githubService.getFileWithFix(owner, repo, path);
+    res.json(result);
+  } catch (err) {
+    console.error("Fix file error:", err);
+    res.status(500).json({ error: "Failed to fix file" });
+  }
+}
+
 module.exports = {
   index,
   analyzeRepository,
   getFileContent,
   deleteRepo,
+  fixFile,
 };

@@ -151,7 +151,7 @@ export default function Dashboard() {
               onFileSelect={handleFileSelect}
               onPathClick={handlePathClick}
             />
-            <FileContent file={selectedFile} content={fileContent} />
+            <FileContent file={selectedFile} content={fileContent} owner={repoData?.repository?.owner?.login} repo={repoData?.repository?.name} />
           </div>
         )}
       </div>

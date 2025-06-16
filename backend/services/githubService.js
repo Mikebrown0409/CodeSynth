@@ -131,7 +131,7 @@ async function listRepositoryFiles(owner, repo) {
     branch: repoData.default_branch,
   });
 
-  // Get full tree recursively (single request) 🎄
+  // Get full tree recursively (single request)
   const {
     data: { tree },
   } = await octokit.git.getTree({
@@ -219,6 +219,28 @@ async function getLatestCommitSha(owner, repo) {
   return branchData.commit.sha;
 }
 
+// Return fixed code for a single file using ESLint --fix (no repo writes yet, need to add)
+async function getFileWithFix(owner, repo, path) {
+  // Fetch raw file content via GitHub API
+  const { data } = await octokit.repos.getContent({ owner, repo, path });
+
+  if (!data.content) throw new Error("No file content returned");
+
+  const source = Buffer.from(data.content, "base64").toString("utf8");
+
+  // Run ESLint with automatic fixes enabled
+  const eslintWithFix = new ESLint({ fix: true });
+  const [result] = await eslintWithFix.lintText(source, { filePath: path });
+
+  const fixedCode = result.output || source; 
+
+  return {
+    fixed: Boolean(result.output),
+    fixedCode,
+    messages: result.messages,
+  };
+}
+
 module.exports = {
   getRepository,
   getRepositoryContents,
@@ -228,4 +250,5 @@ module.exports = {
   listRepositoryFiles,
   groupMessagesByRule,
   getLatestCommitSha,
+  getFileWithFix,
 };

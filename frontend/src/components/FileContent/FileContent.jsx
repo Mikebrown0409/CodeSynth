@@ -2,8 +2,9 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./FileContent.css";
 import { useState } from "react";
+import * as gitService from "../../services/gitService";
 
-export default function FileContent({ file, content }) {
+export default function FileContent({ file, content, owner, repo }) {
   if (!file || !content) return null;
 
   // Group lint results by rule/message
@@ -17,10 +18,33 @@ export default function FileContent({ file, content }) {
   }, {});
 
   const [openRule, setOpenRule] = useState(null);
+  const [fixing, setFixing] = useState(false);
+
+  async function handleAutoFix() {
+    if (!owner || !repo || !file?.path) return;
+    try {
+      setFixing(true);
+      const res = await gitService.fixFile({ owner, repo, path: file.path });
+      // Update content with fixed code and new lint messages
+      content.content = res.fixedCode;
+      content.lintResults = res.messages;
+      setOpenRule(null); // collapse groups after fix
+    } catch (err) {
+      console.error("Auto-fix failed", err);
+      alert("Auto-fix failed: " + err.message);
+    } finally {
+      setFixing(false);
+    }
+  }
 
   return (
     <div className="file-content">
       <h3>{file.name}</h3>
+      {content.lintResults && content.lintResults.length > 0 && (
+        <button className="fix-btn" onClick={handleAutoFix} disabled={fixing}>
+          {fixing ? "Fixing..." : "Auto Fix"}
+        </button>
+      )}
       {Object.keys(groupedLint).length > 0 && (
         <div className="lint-results">
           <h4>Lint Issues:</h4>

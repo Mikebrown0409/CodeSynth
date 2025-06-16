@@ -20,3 +20,7 @@ export async function analyzeRepo({ owner, repoName }) {
 export async function getFileContent({ owner, repo, path }) {
   return sendRequest(`${BASE_URL}content`, "POST", { owner, repo, path });
 }
+
+export async function fixFile({ owner, repo, path }) {
+  return sendRequest(`${BASE_URL}fix`, "POST", { owner, repo, path });
+}
