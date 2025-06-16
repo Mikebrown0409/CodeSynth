@@ -4,6 +4,7 @@ import FileTree from "../../components/FileTree/FileTree";
 import FileContent from "../../components/FileContent/FileContent";
 import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
+import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
 import "./dashboard.css";
 
 export default function Dashboard() {
@@ -132,20 +133,28 @@ export default function Dashboard() {
         />
       </div>
 
-      <RepoAnalyzer onAnalyze={handleAnalysis} />
-      {error && <div className="error-message">{error}</div>}
+      <div className="main-area">
+        <RepoAnalyzer onAnalyze={handleAnalysis} />
+        {error && <div className="error-message">{error}</div>}
 
-      {repoData && (
-        <div className="repo-content">
-          <FileTree
-            contents={repoData.contents}
-            currentPath={currentPath}
-            onFileSelect={handleFileSelect}
-            onPathClick={handlePathClick}
-          />
-          <FileContent file={selectedFile} content={fileContent} />
-        </div>
-      )}
+        {repoData && (
+          <div className="repo-content">
+            {repoData.lintSummary && (
+              <RepoLintSummary
+                summary={repoData.lintSummary}
+                messages={repoData.lintMessages || []}
+              />
+            )}
+            <FileTree
+              contents={repoData.contents}
+              currentPath={currentPath}
+              onFileSelect={handleFileSelect}
+              onPathClick={handlePathClick}
+            />
+            <FileContent file={selectedFile} content={fileContent} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

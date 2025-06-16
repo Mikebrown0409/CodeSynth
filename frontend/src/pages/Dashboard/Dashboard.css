@@ -1,7 +1,19 @@
 .dashboard-container {
+  display: flex;
+  gap: 20px;
   padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+}
+
+/* Sidebar */
+.user-repos {
+  width: 250px;
+  border-right: 1px solid #ddd;
+  padding-right: 15px;
+  overflow-y: auto;
+}
+
+.main-area {
+  flex: 1;
 }
 
 .error-message {

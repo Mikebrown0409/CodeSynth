@@ -14,10 +14,14 @@ const RepoSchema = new Schema(
     },
     lastAnalyzed: { type: Date, default: Date.now },
     isPublic: { type: Boolean, default: true },
+    latestCommitSha: { type: String },
+    lintSummary: { type: Schema.Types.Mixed },
+    lintMessages: { type: Schema.Types.Mixed },
   },
   {
     timestamps: true,
   }
 );
+
 
 module.exports = mongoose.model("Repo", RepoSchema);

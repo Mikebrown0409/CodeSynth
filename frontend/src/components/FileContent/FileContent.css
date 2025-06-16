@@ -38,3 +38,24 @@
   border-radius: 4px;
   overflow: hidden;
 }
+
+.lint-group {
+  margin-bottom: 0.5rem;
+}
+
+.lint-group-header {
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.lint-occurrences {
+  padding-left: 1rem;
+}
+
+.lint-issue-item {
+  font-size: 0.9em;
+  padding: 2px 0;
+}

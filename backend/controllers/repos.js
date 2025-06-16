@@ -28,11 +28,36 @@ async function analyzeRepository(req, res) {
     // Get basic repository info
     const repoData = await githubService.getRepository(owner, repo);
 
+    // Determine latest commit SHA for caching validation
+    const latestCommitSha = await githubService.getLatestCommitSha(owner, repo);
+
+    // Check if we have up-to-date analysis cached
+    let cachedRepo = await Repo.findOne({
+      repo_id: repoData.id.toString(),
+      latestCommitSha,
+    });
+
+    if (cachedRepo && cachedRepo.lintSummary && cachedRepo.lintMessages) {
+      return res.json({
+        repository: repoData,
+        contents: await githubService.getRepositoryContents(owner, repo), // still refresh tree
+        lintingIssues: await githubService.getLintingIssues(owner, repo),
+        lintSummary: cachedRepo.lintSummary,
+        lintMessages: cachedRepo.lintMessages,
+        cached: true,
+        savedRepo: cachedRepo,
+      });
+    }
+
     // Get repository contents
     const contents = await githubService.getRepositoryContents(owner, repo);
 
     // Get linting issues
     const lintingIssues = await githubService.getLintingIssues(owner, repo);
+
+    // Perform repository-wide linting in memory (grouped + detailed)
+    const { grouped: lintSummary, messages: lintMessages } =
+      await githubService.lintRepository(owner, repo);
 
     // Save to database
     const savedRepo = await Repo.findOneAndUpdate(
@@ -45,6 +70,9 @@ async function analyzeRepository(req, res) {
         user: req.user._id,
         isPublic: !repoData.private,
         lastAnalyzed: new Date(),
+        latestCommitSha,
+        lintSummary,
+        lintMessages,
       },
       { new: true, upsert: true }
     );
@@ -53,6 +81,8 @@ async function analyzeRepository(req, res) {
       repository: repoData,
       contents,
       lintingIssues,
+      lintSummary,
+      lintMessages,
       savedRepo,
     });
   } catch (error) {

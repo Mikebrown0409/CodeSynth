@@ -1,33 +1,56 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./FileContent.css";
+import { useState } from "react";
 
 export default function FileContent({ file, content }) {
   if (!file || !content) return null;
 
+  // Group lint results by rule/message
+  const groupedLint = (content.lintResults || []).reduce((acc, issue) => {
+    const key = issue.ruleId || issue.message;
+    if (!acc[key]) {
+      acc[key] = { ...issue, occurrences: [] };
+    }
+    acc[key].occurrences.push(issue);
+    return acc;
+  }, {});
+
+  const [openRule, setOpenRule] = useState(null);
+
   return (
     <div className="file-content">
       <h3>{file.name}</h3>
-      {content.lintResults &&
-        content.lintResults.length > 0 && ( // lint addition
-          <div className="lint-results">
-            <h4>Lint Issues:</h4>
-            {content.lintResults.map((issue, index) => (
+      {Object.keys(groupedLint).length > 0 && (
+        <div className="lint-results">
+          <h4>Lint Issues:</h4>
+          {Object.entries(groupedLint).map(([key, group]) => (
+            <div key={key} className="lint-group">
               <div
-                key={index}
-                className={`lint-issue ${
-                  issue.severity === 2 ? "error" : "warning"
+                className={`lint-group-header ${
+                  group.severity === 2 ? "error" : "warning"
                 }`}
+                onClick={() =>
+                  setOpenRule((prev) => (prev === key ? null : key))
+                }
               >
-                <span className="line-number">Line {issue.line}:</span>
-                <span className="message">{issue.message}</span>
-                {issue.ruleId && (
-                  <span className="rule-id">({issue.ruleId})</span>
-                )}
+                <span className="rule-id">{group.ruleId || "Other"}</span>
+                <span className="count">({group.occurrences.length})</span>
               </div>
-            ))}
-          </div>
-        )}
+              {openRule === key && (
+                <div className="lint-occurrences">
+                  {group.occurrences.map((occ, idx) => (
+                    <div key={idx} className="lint-issue-item">
+                      Line {occ.line}:{" "}
+                      {occ.message}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="code-container">
         {(() => {
           // syntax highlight starts
