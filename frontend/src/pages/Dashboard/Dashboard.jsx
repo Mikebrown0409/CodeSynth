@@ -6,7 +6,8 @@ import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
 import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
 import NavBar from "../../components/Layout/NavBar";
-import Sidebar from "../../components/Layout/Sidebar";
+import { Card, CardContent } from "../../components/ui/card";
+import { Code2 } from "lucide-react";
 
 export default function Dashboard() {
   const [currentPath, setCurrentPath] = useState("");
@@ -30,43 +31,46 @@ export default function Dashboard() {
 
   async function handleRepoClick(repo) {
     try {
-      console.log("Clicked repo:", repo); // Debug log
+      console.log("Clicked repo:", repo);
 
-      // Parse URL more reliably
       const url = new URL(repo.repo_url);
       const pathParts = url.pathname.split("/");
-      // GitHub URLs are structured as github.com/owner/repo
       const owner = pathParts[1];
       const repoName = pathParts[2];
 
-      console.log("Attempting analysis with:", { owner, repoName }); // Debug log
+      console.log("Attempting analysis with:", { owner, repoName });
 
       const analysis = await gitService.analyzeRepo({ owner, repoName });
-      console.log("Analysis result:", analysis); // Debug log
+      console.log("Analysis result:", analysis);
 
       setRepoData(analysis);
+      setCurrentPath("");
+      setSelectedFile(null);
+      setFileContent(null);
     } catch (err) {
-      console.error("Analysis error:", err); // More detailed error
+      console.error("Analysis error:", err);
       setError(`Failed to analyze repository: ${err.message}`);
     }
   }
 
   async function handleAnalysis(data) {
     setRepoData(data);
+    setCurrentPath("");
+    setSelectedFile(null);
+    setFileContent(null);
   }
 
   async function handleFileSelect(item) {
     console.log("Selected item:", item);
 
     if (item.type === "dir") {
-      // Handle directory click
       try {
         const contents = await gitService.getFileContent({
           owner: repoData.repository.owner.login,
           repo: repoData.repository.name,
-          path: item.path, // Flip from file to item to avoid erroring out
+          path: item.path,
         });
-        setCurrentPath(item.path); // Added path state to track this for nav purposes
+        setCurrentPath(item.path);
         setRepoData({
           ...repoData,
           contents: contents,
@@ -75,7 +79,6 @@ export default function Dashboard() {
         setError("Failed to fetch directory contents");
       }
     } else {
-      // Handle file click
       try {
         const response = await gitService.getFileContent({
           owner: repoData.repository.owner.login,
@@ -89,6 +92,7 @@ export default function Dashboard() {
       }
     }
   }
+
   async function handlePathClick(path) {
     try {
       const contents = await gitService.getFileContent({
@@ -109,13 +113,12 @@ export default function Dashboard() {
   async function handleDeleteClick(repoId) {
     try {
       await gitService.deleteRepo(repoId);
-      // Remove the deleted repo from state
       setRepos(repos.filter((repo) => repo._id !== repoId));
-      // Clear repo data
       if (repoData && repoData.savedRepo._id === repoId) {
         setRepoData(null);
         setSelectedFile(null);
         setFileContent(null);
+        setCurrentPath("");
       }
     } catch (err) {
       console.error("Failed to delete repo:", err);
@@ -124,35 +127,88 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen bg-background text-foreground">
+      {/* Header */}
       <NavBar />
-      <div className="flex flex-1">
-        <Sidebar>
-          <h2 className="text-md font-semibold mb-2">Your Repositories</h2>
-          <RepoList
-            repos={repos}
-            onRepoClick={handleRepoClick}
-            onDeleteClick={handleDeleteClick}
-          />
-        </Sidebar>
-        <main className="flex-1 p-6">
-          <RepoAnalyzer onAnalyze={handleAnalysis} />
-          {error && <div className="error-message">{error}</div>}
-
-          {repoData && (
-            <div className="repo-content">
-              {repoData.lintSummary && (
-                <RepoLintSummary
-                  summary={repoData.lintSummary}
-                  messages={repoData.lintMessages || []}
+      
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <div className="w-80 border-r border-border bg-card overflow-y-auto">
+          <div className="p-4 border-b border-border">
+            <RepoAnalyzer onAnalyze={handleAnalysis} compact />
+            {error && (
+              <div className="mt-4 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                {error}
+              </div>
+            )}
+          </div>
+          <div className="p-4">
+            <RepoList
+              repos={repos}
+              onRepoClick={handleRepoClick}
+              onDeleteClick={handleDeleteClick}
+            />
+          </div>
+        </div>
+        
+        {/* Main Content Area */}
+        {!repoData ? (
+          /* Welcome Screen */
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="w-full max-w-2xl space-y-8">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
+                    <Code2 className="h-8 w-8 text-primary" />
+                  </div>
+                </div>
+                <h1 className="text-4xl font-bold tracking-tight">
+                  Welcome to CodeSynth
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                  Analyze GitHub repositories for code quality and lint issues. 
+                  Discover potential improvements and maintain clean, consistent code.
+                </p>
+              </div>
+              
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-muted-foreground">
+                    <p>
+                      {repos.length === 0 
+                        ? "No repositories analyzed yet. Use the analyzer in the sidebar to get started."
+                        : "Select a repository from the sidebar to view its analysis, or add a new one using the analyzer above."
+                      }
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        ) : (
+          /* Repository Analysis View */
+          <>
+            {/* Middle Panel */}
+            <div className="w-80 border-r border-border bg-card overflow-y-auto">
+              <div className="p-4 space-y-4">
+                {repoData.lintSummary && (
+                  <RepoLintSummary
+                    summary={repoData.lintSummary}
+                    messages={repoData.lintMessages || []}
+                  />
+                )}
+                <FileTree
+                  contents={repoData.contents}
+                  currentPath={currentPath}
+                  onFileSelect={handleFileSelect}
+                  onPathClick={handlePathClick}
                 />
-              )}
-              <FileTree
-                contents={repoData.contents}
-                currentPath={currentPath}
-                onFileSelect={handleFileSelect}
-                onPathClick={handlePathClick}
-              />
+              </div>
+            </div>
+            
+            {/* Right Panel */}
+            <div className="flex-1 overflow-y-auto bg-background">
               <FileContent
                 file={selectedFile}
                 content={fileContent}
@@ -160,8 +216,8 @@ export default function Dashboard() {
                 repo={repoData?.repository?.name}
               />
             </div>
-          )}
-        </main>
+          </>
+        )}
       </div>
     </div>
   );

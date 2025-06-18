@@ -8,6 +8,7 @@ const octokit = new Octokit({
 });
 
 const eslint = new ESLint();
+const eslintWithFix = new ESLint({ fix: true });
 
 /**
  * Get repository details
@@ -228,8 +229,7 @@ async function getFileWithFix(owner, repo, path) {
 
   const source = Buffer.from(data.content, "base64").toString("utf8");
 
-  // Run ESLint with automatic fixes enabled
-  const eslintWithFix = new ESLint({ fix: true });
+  // Use the pre-initialized eslint instance with fix enabled
   const [result] = await eslintWithFix.lintText(source, { filePath: path });
 
   const fixedCode = result.output || source; 

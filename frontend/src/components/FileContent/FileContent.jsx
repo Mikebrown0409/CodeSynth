@@ -1,11 +1,23 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import "./FileContent.css";
 import { useState } from "react";
 import * as gitService from "../../services/gitService";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { ChevronDown, ChevronRight, File, Wrench, AlertTriangle, XCircle } from "lucide-react";
 
 export default function FileContent({ file, content, owner, repo }) {
-  if (!file || !content) return null;
+  if (!file || !content) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        <div className="text-center">
+          <File className="mx-auto h-12 w-12 mb-4" />
+          <p>Select a file to view its contents</p>
+        </div>
+      </div>
+    );
+  }
 
   // Group lint results by rule/message
   const groupedLint = (content.lintResults || []).reduce((acc, issue) => {
@@ -25,10 +37,9 @@ export default function FileContent({ file, content, owner, repo }) {
     try {
       setFixing(true);
       const res = await gitService.fixFile({ owner, repo, path: file.path });
-      // Update content with fixed code and new lint messages
       content.content = res.fixedCode;
       content.lintResults = res.messages;
-      setOpenRule(null); // collapse groups after fix
+      setOpenRule(null);
     } catch (err) {
       console.error("Auto-fix failed", err);
       alert("Auto-fix failed: " + err.message);
@@ -37,73 +48,109 @@ export default function FileContent({ file, content, owner, repo }) {
     }
   }
 
+  const extension = file.name.split(".").pop().toLowerCase();
+
   return (
-    <div className="file-content">
-      <h3>{file.name}</h3>
-      {content.lintResults && content.lintResults.length > 0 && (
-        <button className="fix-btn" onClick={handleAutoFix} disabled={fixing}>
-          {fixing ? "Fixing..." : "Auto Fix"}
-        </button>
-      )}
-      {Object.keys(groupedLint).length > 0 && (
-          <div className="lint-results">
-            <h4>Lint Issues:</h4>
-          {Object.entries(groupedLint).map(([key, group]) => (
-            <div key={key} className="lint-group">
-              <div
-                className={`lint-group-header ${
-                  group.severity === 2 ? "error" : "warning"
-                }`}
-                onClick={() =>
-                  setOpenRule((prev) => (prev === key ? null : key))
-                }
-              >
-                <span className="rule-id">{group.ruleId || "Other"}</span>
-                <span className="count">({group.occurrences.length})</span>
-              </div>
-              {openRule === key && (
-                <div className="lint-occurrences">
-                  {group.occurrences.map((occ, idx) => (
-                    <div key={idx} className="lint-issue-item">
-                      Line {occ.line}:{" "}
-                      {occ.message}
-                    </div>
-                  ))}
-                </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      <div className="code-container">
-        {(() => {
-          // syntax highlight starts
-          const extension = file.name.split(".").pop().toLowerCase();
-          return (
-            <SyntaxHighlighter
-              language={extension === "jsx" ? "javascript" : extension}
-              style={vscDarkPlus}
-              showLineNumbers={true}
-              wrapLines={true}
-              lineProps={(lineNumber) => {
-                const issue = content.lintResults?.find(
-                  (i) => i.line === lineNumber
+    <div className="h-full flex flex-col">
+      <div className="border-b bg-background p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <File className="h-5 w-5" />
+            {file.name}
+          </h3>
+          {content.lintResults && content.lintResults.length > 0 && (
+            <Button onClick={handleAutoFix} disabled={fixing} className="gap-2">
+              <Wrench className="h-4 w-4" />
+              {fixing ? "Fixing..." : "Auto Fix"}
+            </Button>
+          )}
+        </div>
+
+        {Object.keys(groupedLint).length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                Lint Issues ({Object.keys(groupedLint).length} rules)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {Object.entries(groupedLint).map(([key, group]) => {
+                const isOpen = openRule === key;
+                const isError = group.severity === 2;
+                
+                return (
+                  <div key={key} className="border rounded-md">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-between p-3 h-auto"
+                      onClick={() => setOpenRule(prev => prev === key ? null : key)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isError ? (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                        )}
+                        <span className="font-mono text-sm">{group.ruleId || "Other"}</span>
+                        <Badge variant={isError ? "destructive" : "secondary"}>
+                          {group.occurrences.length}
+                        </Badge>
+                      </div>
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </Button>
+                    
+                    {isOpen && (
+                      <div className="border-t bg-muted/50 p-3">
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {group.occurrences.map((occ, idx) => (
+                            <div key={idx} className="text-xs text-muted-foreground">
+                              Line {occ.line}: {occ.message}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
-                return {
-                  style: {
-                    backgroundColor: issue
-                      ? issue.severity === 2
-                        ? "#ff000020"
-                        : "#ffff0020" // hex easier
-                      : undefined,
-                  },
-                };
-              }}
-            >
-              {content.content}
-            </SyntaxHighlighter>
-          );
-        })()}
+              })}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-auto">
+        <SyntaxHighlighter
+          language={extension === "jsx" ? "javascript" : extension}
+          style={vscDarkPlus}
+          showLineNumbers={true}
+          wrapLines={true}
+          customStyle={{
+            margin: 0,
+            background: 'transparent',
+            fontSize: '14px',
+          }}
+          lineProps={(lineNumber) => {
+            const issue = content.lintResults?.find(
+              (i) => i.line === lineNumber
+            );
+            return {
+              style: {
+                backgroundColor: issue
+                  ? issue.severity === 2
+                    ? "#ff000020"
+                    : "#ffff0020"
+                  : undefined,
+              },
+            };
+          }}
+        >
+          {content.content}
+        </SyntaxHighlighter>
       </div>
     </div>
   );
