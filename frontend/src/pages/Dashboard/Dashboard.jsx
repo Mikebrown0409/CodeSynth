@@ -5,7 +5,6 @@ import FileContent from "../../components/FileContent/FileContent";
 import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
 import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
-import "./Dashboard.css";
 import NavBar from "../../components/Layout/NavBar";
 import Sidebar from "../../components/Layout/Sidebar";
 

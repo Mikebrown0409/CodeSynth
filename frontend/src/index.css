@@ -46,12 +46,6 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background-color: white;
-  color: #1a1a1a;
-  border-color: #1a1a1a;
-}
-
 button:disabled {
   background-color: grey;
 }
