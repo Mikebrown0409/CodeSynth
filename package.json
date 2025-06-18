@@ -4,7 +4,7 @@
   "main": "./backend/server.js",
   "scripts": {
     "start": "node ./backend/server.js",
-    "build": "npm install && cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build"
+    "build": "npm install && cd frontend && rm -rf node_modules package-lock.json && npm install && npm install @rollup/rollup-linux-x64-gnu --save-optional && npm run build"
   },
   "keywords": [],
   "author": "",
