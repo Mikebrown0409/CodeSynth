@@ -134,26 +134,26 @@ export default function Dashboard() {
       </div>
 
       <div className="main-area">
-        <RepoAnalyzer onAnalyze={handleAnalysis} />
-        {error && <div className="error-message">{error}</div>}
+      <RepoAnalyzer onAnalyze={handleAnalysis} />
+      {error && <div className="error-message">{error}</div>}
 
-        {repoData && (
-          <div className="repo-content">
+      {repoData && (
+        <div className="repo-content">
             {repoData.lintSummary && (
               <RepoLintSummary
                 summary={repoData.lintSummary}
                 messages={repoData.lintMessages || []}
               />
             )}
-            <FileTree
-              contents={repoData.contents}
-              currentPath={currentPath}
-              onFileSelect={handleFileSelect}
-              onPathClick={handlePathClick}
-            />
+          <FileTree
+            contents={repoData.contents}
+            currentPath={currentPath}
+            onFileSelect={handleFileSelect}
+            onPathClick={handlePathClick}
+          />
             <FileContent file={selectedFile} content={fileContent} owner={repoData?.repository?.owner?.login} repo={repoData?.repository?.name} />
-          </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

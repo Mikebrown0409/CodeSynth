@@ -46,8 +46,8 @@ export default function FileContent({ file, content, owner, repo }) {
         </button>
       )}
       {Object.keys(groupedLint).length > 0 && (
-        <div className="lint-results">
-          <h4>Lint Issues:</h4>
+          <div className="lint-results">
+            <h4>Lint Issues:</h4>
           {Object.entries(groupedLint).map(([key, group]) => (
             <div key={key} className="lint-group">
               <div
@@ -70,11 +70,11 @@ export default function FileContent({ file, content, owner, repo }) {
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       <div className="code-container">
         {(() => {
           // syntax highlight starts
