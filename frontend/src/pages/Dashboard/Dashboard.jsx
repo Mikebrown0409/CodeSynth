@@ -6,6 +6,8 @@ import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
 import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
 import "./Dashboard.css";
+import NavBar from "../../components/Layout/NavBar";
+import Sidebar from "../../components/Layout/Sidebar";
 
 export default function Dashboard() {
   const [currentPath, setCurrentPath] = useState("");
@@ -123,37 +125,44 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="dashboard-container">
-      <div className="user-repos">
-        <h2>Your Repositories</h2>
-        <RepoList
-          repos={repos}
-          onRepoClick={handleRepoClick}
-          onDeleteClick={handleDeleteClick}
-        />
-      </div>
-
-      <div className="main-area">
-      <RepoAnalyzer onAnalyze={handleAnalysis} />
-      {error && <div className="error-message">{error}</div>}
-
-      {repoData && (
-        <div className="repo-content">
-            {repoData.lintSummary && (
-              <RepoLintSummary
-                summary={repoData.lintSummary}
-                messages={repoData.lintMessages || []}
-              />
-            )}
-          <FileTree
-            contents={repoData.contents}
-            currentPath={currentPath}
-            onFileSelect={handleFileSelect}
-            onPathClick={handlePathClick}
+    <div className="flex flex-col min-h-screen">
+      <NavBar />
+      <div className="flex flex-1">
+        <Sidebar>
+          <h2 className="text-md font-semibold mb-2">Your Repositories</h2>
+          <RepoList
+            repos={repos}
+            onRepoClick={handleRepoClick}
+            onDeleteClick={handleDeleteClick}
           />
-            <FileContent file={selectedFile} content={fileContent} owner={repoData?.repository?.owner?.login} repo={repoData?.repository?.name} />
-        </div>
-      )}
+        </Sidebar>
+        <main className="flex-1 p-6">
+          <RepoAnalyzer onAnalyze={handleAnalysis} />
+          {error && <div className="error-message">{error}</div>}
+
+          {repoData && (
+            <div className="repo-content">
+              {repoData.lintSummary && (
+                <RepoLintSummary
+                  summary={repoData.lintSummary}
+                  messages={repoData.lintMessages || []}
+                />
+              )}
+              <FileTree
+                contents={repoData.contents}
+                currentPath={currentPath}
+                onFileSelect={handleFileSelect}
+                onPathClick={handlePathClick}
+              />
+              <FileContent
+                file={selectedFile}
+                content={fileContent}
+                owner={repoData?.repository?.owner?.login}
+                repo={repoData?.repository?.name}
+              />
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
