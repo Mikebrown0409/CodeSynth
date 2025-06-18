@@ -5,7 +5,7 @@ import FileContent from "../../components/FileContent/FileContent";
 import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
 import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
-import "./dashboard.css";
+import "./Dashboard.css";
 
 export default function Dashboard() {
   const [currentPath, setCurrentPath] = useState("");
