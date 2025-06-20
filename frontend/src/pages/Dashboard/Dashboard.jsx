@@ -5,6 +5,7 @@ import FileTree from "../../components/FileTree/FileTree";
 import FileContent from "../../components/FileContent/FileContent";
 import RepoList from "../../components/RepoList/RepoList";
 import * as gitService from "../../services/gitService";
+import * as favoriteService from "../../services/favoriteService";
 import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
 import NavBar from "../../components/Layout/NavBar";
 import { Card, CardContent } from "../../components/ui/card";
@@ -20,12 +21,17 @@ export default function Dashboard() {
   const [fileContent, setFileContent] = useState(null);
   const [error, setError] = useState("");
   const [showIssueOnly, setShowIssueOnly] = useState(false);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     async function loadUserRepos() {
       try {
-        const userRepos = await gitService.index();
+        const [userRepos, favs] = await Promise.all([
+          gitService.index(),
+          favoriteService.getFavorites()
+        ]);
         setRepos(userRepos);
+        setFavorites(favs.map(f => f.repo._id));
       } catch (err) {
         setError("Failed to load repositories.");
       }
@@ -214,6 +220,21 @@ export default function Dashboard() {
     });
   }
 
+  async function handleToggleFavorite(repoId) {
+    try {
+      await favoriteService.toggleFavorite(repoId);
+      setFavorites(prevFavorites => {
+        if (prevFavorites.includes(repoId)) {
+          return prevFavorites.filter(id => id !== repoId);
+        } else {
+          return [...prevFavorites, repoId];
+        }
+      });
+    } catch (err) {
+      setError("Failed to toggle favorite");
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       {/* Header */}
@@ -234,8 +255,10 @@ export default function Dashboard() {
           <div className="p-4">
             <RepoList
               repos={repos}
+              favorites={favorites}
               onRepoClick={handleRepoClick}
               onDeleteClick={handleDeleteClick}
+              onToggleFavorite={handleToggleFavorite}
             />
           </div>
         </div>

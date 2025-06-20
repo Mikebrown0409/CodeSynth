@@ -68,10 +68,12 @@ $ npm run dev
 ## Next Steps
 
 1. **Commit Auto-Fixes** – push ESLint `--fix` patches directly to GitHub via PR.
-2. **Notes / Comments** – second data entity allowing users to annotate code smells.
-3. **Dark-Mode Toggle** – remember user preference in `localStorage`.
-4. **Accessibility Audit** – AA contrast, focus rings, keyboard navigation.
+2. **Notes / Comments** – allow users to include notes/comments to attach to review.
+3. **AI Integration** – integrate with an AI model to review code issues that aren't resolved and provide feedback to user on commit.
+4. **Rules Flexibility** – add a rules option to allow users to select and choose rules. 
 5. **Search Bar** – quickly jump to files or error types.
+6. **Additional Formatters - Security Tools** - add prettier and potentially other security audits that will assist in catching issues sooner rather than later.
+
 
 ---
 ## Attributions

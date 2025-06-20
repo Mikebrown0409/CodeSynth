@@ -5,8 +5,6 @@ const Repo = require("../models/repo");
 async function index(req, res) {
   try {
     const repo = await Repo.find({ user: req.user._id });
-    // .populate("owner");
-    // .populate("comments.author");
     res.json(repo);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch repositories" });
