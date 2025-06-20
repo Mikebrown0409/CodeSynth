@@ -3,6 +3,8 @@ import { Code2 } from "lucide-react";
 import { buttonVariants } from "../ui/button";
 
 export default function PublicHeader() {
+  const apiBaseUrl = import.meta.env.DEV ? 'http://localhost:3000' : '';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
@@ -11,18 +13,18 @@ export default function PublicHeader() {
           <span className="hidden sm:inline-block">CodeSynth</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link
-            to="/login"
+          <a
+            href={`${apiBaseUrl}/api/auth/github`}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            Log in
-          </Link>
-          <Link
-            to="/signup"
+            Sign in with GitHub
+          </a>
+          <a
+            href={`${apiBaseUrl}/api/auth/github`}
             className={buttonVariants({ size: "sm" })}
           >
-            Sign up
-          </Link>
+            Get Started
+          </a>
         </div>
       </div>
     </header>

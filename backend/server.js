@@ -1,6 +1,7 @@
 const path = require("path"); // Built into Node
 const express = require("express");
 const logger = require("morgan");
+const session = require("express-session");
 const app = express();
 
 // Process the secrets/config vars in .env
@@ -10,6 +11,18 @@ require("dotenv").config();
 require("./db");
 
 app.use(logger("dev"));
+
+// Session middleware for OAuth state
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
 // Serve static assets from the frontend's built code folder (dist)
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 // Note that express.urlencoded middleware is not needed
@@ -33,5 +46,5 @@ app.get("/*splat", function (req, res) {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`The express app is listening on ${port}`);
+  // Server started on port ${port}
 });

@@ -31,6 +31,9 @@ export default function FileContent({ file, content, owner, repo }) {
 
   const [openRule, setOpenRule] = useState(null);
   const [fixing, setFixing] = useState(false);
+  const [view, setView] = useState(
+    Object.keys(groupedLint).length > 0 ? "issues" : "code"
+  );
 
   async function handleAutoFix() {
     if (!owner || !repo || !file?.path) return;
@@ -41,7 +44,7 @@ export default function FileContent({ file, content, owner, repo }) {
       content.lintResults = res.messages;
       setOpenRule(null);
     } catch (err) {
-      console.error("Auto-fix failed", err);
+      // Auto-fix failed
       alert("Auto-fix failed: " + err.message);
     } finally {
       setFixing(false);
@@ -58,15 +61,33 @@ export default function FileContent({ file, content, owner, repo }) {
             <File className="h-5 w-5" />
             {file.name}
           </h3>
-          {content.lintResults && content.lintResults.length > 0 && (
-            <Button onClick={handleAutoFix} disabled={fixing} className="gap-2">
-              <Wrench className="h-4 w-4" />
-              {fixing ? "Fixing..." : "Auto Fix"}
+          <div className="flex items-center gap-2">
+            {Object.keys(groupedLint).length > 0 && (
+              <Button
+                variant={view === "issues" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setView("issues")}
+              >
+                Issues
+              </Button>
+            )}
+            <Button
+              variant={view === "code" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setView("code")}
+            >
+              Code
             </Button>
-          )}
+            {content.lintResults && content.lintResults.length > 0 && (
+              <Button onClick={handleAutoFix} disabled={fixing} className="gap-2">
+                <Wrench className="h-4 w-4" />
+                {fixing ? "Fixing..." : "Auto Fix"}
+              </Button>
+            )}
+          </div>
         </div>
 
-        {Object.keys(groupedLint).length > 0 && (
+        {view === "issues" && Object.keys(groupedLint).length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -74,7 +95,7 @@ export default function FileContent({ file, content, owner, repo }) {
                 Lint Issues ({Object.keys(groupedLint).length} rules)
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 max-h-80 overflow-y-auto">
               {Object.entries(groupedLint).map(([key, group]) => {
                 const isOpen = openRule === key;
                 const isError = group.severity === 2;
@@ -123,35 +144,37 @@ export default function FileContent({ file, content, owner, repo }) {
         )}
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <SyntaxHighlighter
-          language={extension === "jsx" ? "javascript" : extension}
-          style={vscDarkPlus}
-          showLineNumbers={true}
-          wrapLines={true}
-          customStyle={{
-            margin: 0,
-            background: 'transparent',
-            fontSize: '14px',
-          }}
-          lineProps={(lineNumber) => {
-            const issue = content.lintResults?.find(
-              (i) => i.line === lineNumber
-            );
-            return {
-              style: {
-                backgroundColor: issue
-                  ? issue.severity === 2
-                    ? "#ff000020"
-                    : "#ffff0020"
-                  : undefined,
-              },
-            };
-          }}
-        >
-          {content.content}
-        </SyntaxHighlighter>
-      </div>
+      {view === "code" && (
+        <div className="flex-1 overflow-auto">
+          <SyntaxHighlighter
+            language={extension === "jsx" ? "javascript" : extension}
+            style={vscDarkPlus}
+            showLineNumbers={true}
+            wrapLines={true}
+            customStyle={{
+              margin: 0,
+              background: 'transparent',
+              fontSize: '14px',
+            }}
+            lineProps={(lineNumber) => {
+              const issue = content.lintResults?.find(
+                (i) => i.line === lineNumber
+              );
+              return {
+                style: {
+                  backgroundColor: issue
+                    ? issue.severity === 2
+                      ? "#ff000020"
+                      : "#ffff0020"
+                    : undefined,
+                },
+              };
+            }}
+          >
+            {content.content}
+          </SyntaxHighlighter>
+        </div>
+      )}
     </div>
   );
 }

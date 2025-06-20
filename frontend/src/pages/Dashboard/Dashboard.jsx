@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router";
 import RepoAnalyzer from "../../components/RepoAnalyzer/RepoAnalyzer";
 import FileTree from "../../components/FileTree/FileTree";
 import FileContent from "../../components/FileContent/FileContent";
@@ -8,14 +9,17 @@ import RepoLintSummary from "../../components/RepoLintSummary/RepoLintSummary";
 import NavBar from "../../components/Layout/NavBar";
 import { Card, CardContent } from "../../components/ui/card";
 import { Code2 } from "lucide-react";
+import { Button } from "../../components/ui/button";
 
 export default function Dashboard() {
+  const location = useLocation();
   const [currentPath, setCurrentPath] = useState("");
   const [repos, setRepos] = useState([]);
   const [repoData, setRepoData] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileContent, setFileContent] = useState(null);
   const [error, setError] = useState("");
+  const [showIssueOnly, setShowIssueOnly] = useState(false);
 
   useEffect(() => {
     async function loadUserRepos() {
@@ -29,39 +33,90 @@ export default function Dashboard() {
     loadUserRepos();
   }, []);
 
+  // Handle pending repo URL from OAuth flow or route state
+  useEffect(() => {
+    async function handlePendingRepo() {
+      const pendingRepo = localStorage.getItem('pendingRepoUrl');
+      const routeRepo = location.state?.repoUrl;
+      const routeRepoInfo = location.state?.repoInfo;
+      
+      if (pendingRepo || routeRepo) {
+        const repoUrl = pendingRepo || routeRepo;
+        localStorage.removeItem('pendingRepoUrl');
+        
+        try {
+          let owner, repoName;
+          
+          if (routeRepoInfo) {
+            // Use parsed repo info from route state
+            owner = routeRepoInfo.owner;
+            repoName = routeRepoInfo.repoName;
+          } else {
+            // Parse the GitHub URL
+            const url = new URL(repoUrl);
+            const pathParts = url.pathname.split("/").filter(Boolean);
+            
+            if (pathParts.length >= 2) {
+              owner = pathParts[0];
+              repoName = pathParts[1];
+            }
+          }
+          
+          if (owner && repoName) {
+    
+            const analysis = await gitService.analyzeRepo({ owner, repoName });
+            setRepoData(analysis);
+            setCurrentPath("");
+            setSelectedFile(null);
+            setFileContent(null);
+          }
+        } catch (err) {
+          // Failed to auto-analyze repo
+          setError(`Failed to analyze repository: ${err.message}`);
+        }
+      }
+    }
+    
+    handlePendingRepo();
+  }, [location.state]);
+
   async function handleRepoClick(repo) {
     try {
-      console.log("Clicked repo:", repo);
+  
 
       const url = new URL(repo.repo_url);
       const pathParts = url.pathname.split("/");
       const owner = pathParts[1];
       const repoName = pathParts[2];
 
-      console.log("Attempting analysis with:", { owner, repoName });
-
       const analysis = await gitService.analyzeRepo({ owner, repoName });
-      console.log("Analysis result:", analysis);
 
       setRepoData(analysis);
       setCurrentPath("");
       setSelectedFile(null);
       setFileContent(null);
     } catch (err) {
-      console.error("Analysis error:", err);
+      // Analysis error
       setError(`Failed to analyze repository: ${err.message}`);
     }
   }
 
-  async function handleAnalysis(data) {
-    setRepoData(data);
-    setCurrentPath("");
-    setSelectedFile(null);
-    setFileContent(null);
+  async function handleAnalysis(repoInfo) {
+    try {
+  
+      const analysis = await gitService.analyzeRepo(repoInfo);
+      setRepoData(analysis);
+      setCurrentPath("");
+      setSelectedFile(null);
+      setFileContent(null);
+    } catch (err) {
+      // Analysis error
+      setError(`Failed to analyze repository: ${err.message}`);
+    }
   }
 
   async function handleFileSelect(item) {
-    console.log("Selected item:", item);
+
 
     if (item.type === "dir") {
       try {
@@ -121,9 +176,21 @@ export default function Dashboard() {
         setCurrentPath("");
       }
     } catch (err) {
-      console.error("Failed to delete repo:", err);
+      // Failed to delete repo
       setError("Failed to delete repository");
     }
+  }
+
+  function filterContents(contentsList) {
+    if (!showIssueOnly || !repoData || !repoData.lintMessages) return contentsList;
+    const issuePaths = new Set(repoData.lintMessages.map(m => m.file));
+    return contentsList.filter(item => {
+      if (item.type === 'dir') {
+        return Array.from(issuePaths).some(p => p.startsWith(item.path + '/'));
+      } else {
+        return issuePaths.has(item.path);
+      }
+    });
   }
 
   return (
@@ -192,14 +259,28 @@ export default function Dashboard() {
             {/* Middle Panel */}
             <div className="w-80 border-r border-border bg-card overflow-y-auto">
               <div className="p-4 space-y-4">
-                {repoData.lintSummary && (
+                {repoData && (
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      size="sm"
+                      variant={showIssueOnly ? "ghost" : "default"}
+                      onClick={() => setShowIssueOnly(false)}
+                    >All</Button>
+                    <Button
+                      size="sm"
+                      variant={showIssueOnly ? "default" : "ghost"}
+                      onClick={() => setShowIssueOnly(true)}
+                    >With Issues</Button>
+                  </div>
+                )}
+                 {repoData.lintSummary && (
                   <RepoLintSummary
                     summary={repoData.lintSummary}
                     messages={repoData.lintMessages || []}
                   />
                 )}
                 <FileTree
-                  contents={repoData.contents}
+                  contents={filterContents(repoData.contents)}
                   currentPath={currentPath}
                   onFileSelect={handleFileSelect}
                   onPathClick={handlePathClick}

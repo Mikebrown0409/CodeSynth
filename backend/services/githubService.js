@@ -7,6 +7,13 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_ACCESS_TOKEN,
 });
 
+// Create authenticated Octokit instance for user
+function createUserOctokit(userToken) {
+  return new Octokit({
+    auth: userToken,
+  });
+}
+
 const eslint = new ESLint();
 const eslintWithFix = new ESLint({ fix: true });
 
@@ -55,7 +62,7 @@ async function getRepositoryContents(owner, repo, path = "") {
     });
     return data;
   } catch (error) {
-    console.error("Error fetching repository contents:", error);
+    // Error fetching repository contents
     throw error;
   }
 }
@@ -80,12 +87,10 @@ async function getFileContent(owner, repo, path) {
 
       // Check if file is JavaScript/JSX
       if (path.match(/\.(js|jsx)$/)) {
-        console.log(`🔍 Linting ${path}...`);
         const results = await eslint.lintText(content, {
           filePath: path,
         });
         lintResults = results[0].messages;
-        console.log("Lint results:", lintResults);
       }
 
       return {
@@ -96,7 +101,7 @@ async function getFileContent(owner, repo, path) {
 
     throw new Error("Unsupported content type");
   } catch (error) {
-    console.error("Error fetching content:", error);
+    // Error fetching content
     throw error;
   }
 }
@@ -117,7 +122,7 @@ async function getLintingIssues(owner, repo) {
     });
     return data;
   } catch (error) {
-    console.error("Error fetching linting issues:", error);
+    // Error fetching linting issues
     throw error;
   }
 }
@@ -177,6 +182,9 @@ function groupMessagesByRule(messages, sampleCap = 5) {
 
 // Lint an entire repository in-memory (no git clone required)
 async function lintRepository(owner, repo) {
+  // Dynamic import for p-limit v4 (ES module)
+  const { default: pLimit } = await import('p-limit');
+  
   const allFiles = await listRepositoryFiles(owner, repo);
 
   // Filter only JavaScript/TypeScript source files
@@ -241,6 +249,45 @@ async function getFileWithFix(owner, repo, path) {
   };
 }
 
+// Commit fixed code back to the repository (future feature)
+async function commitFixes(owner, repo, path, fixedContent, userToken, branch = 'main') {
+  const userOctokit = new Octokit({ auth: userToken });
+  
+  try {
+    // Get current file to get its SHA
+    const { data: currentFile } = await userOctokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref: branch
+    });
+    
+    // Create commit with fixes
+    const response = await userOctokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: `🔧 Auto-fix ESLint issues in ${path}`,
+      content: Buffer.from(fixedContent).toString('base64'),
+      sha: currentFile.sha,
+      branch: branch,
+      committer: {
+        name: 'CodeSynth Bot',
+        email: 'bot@codesynth.app'
+      }
+    });
+    
+    return {
+      success: true,
+      commitSha: response.data.commit.sha,
+      commitUrl: response.data.commit.html_url
+    };
+  } catch (error) {
+    // Error committing fixes
+    throw new Error(`Failed to commit fixes: ${error.message}`);
+  }
+}
+
 module.exports = {
   getRepository,
   getRepositoryContents,
@@ -251,4 +298,6 @@ module.exports = {
   groupMessagesByRule,
   getLatestCommitSha,
   getFileWithFix,
+  commitFixes,
+  createUserOctokit,
 };

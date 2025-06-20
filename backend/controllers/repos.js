@@ -9,7 +9,6 @@ async function index(req, res) {
     // .populate("comments.author");
     res.json(repo);
   } catch (err) {
-    console.log(err);
     res.status(500).json({ message: "Failed to fetch repositories" });
   }
 }
@@ -86,7 +85,7 @@ async function analyzeRepository(req, res) {
       savedRepo,
     });
   } catch (error) {
-    console.error("Repository analysis error:", error);
+    // Repository analysis error
     res.status(error.status || 500).json({
       error: error.message || "Failed to analyze repository",
     });
@@ -108,7 +107,7 @@ async function getFileContent(req, res) {
     const { content, lintResults } = result;
     res.json({ content, lintResults });
   } catch (err) {
-    console.error("Error fetching content:", err);
+    // Error fetching content
     res.status(500).json({ error: "Failed to fetch content" });
   }
 }
@@ -129,7 +128,7 @@ async function deleteRepo(req, res) {
 
     res.json({ message: "Repository deleted successfully", repo });
   } catch (err) {
-    console.error("Delete error:", err);
+    // Delete error
     res.status(500).json({ error: "Failed to delete repository" });
   }
 }
@@ -144,8 +143,34 @@ async function fixFile(req, res) {
     const result = await githubService.getFileWithFix(owner, repo, path);
     res.json(result);
   } catch (err) {
-    console.error("Fix file error:", err);
+    // Fix file error
     res.status(500).json({ error: "Failed to fix file" });
+  }
+}
+
+// Future feature: Commit fixes to user's repository
+async function commitFixes(req, res) {
+  try {
+    const { owner, repo, path, fixedContent, branch = 'main' } = req.body;
+    const user = req.user;
+    
+    if (!user.githubAccessToken) {
+      return res.status(401).json({ error: 'GitHub authentication required' });
+    }
+    
+    const result = await githubService.commitFixes(
+      owner,
+      repo,
+      path,
+      fixedContent,
+      user.githubAccessToken,
+      branch
+    );
+    
+    res.json(result);
+  } catch (err) {
+    // Error committing fixes
+    res.status(500).json({ error: err.message });
   }
 }
 
@@ -153,6 +178,7 @@ module.exports = {
   index,
   analyzeRepository,
   getFileContent,
-  deleteRepo,
+  delete: deleteRepo,
   fixFile,
+  commitFixes,
 };

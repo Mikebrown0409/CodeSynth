@@ -18,6 +18,17 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    githubId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values while maintaining uniqueness
+    },
+    githubUsername: {
+      type: String,
+    },
+    githubAccessToken: {
+      type: String,
+    },
     repositories: [
       {
         type: Schema.Types.ObjectId,
@@ -31,6 +42,7 @@ const userSchema = new Schema(
     toJSON: {
       transform: function (doc, ret) {
         delete ret.password;
+        delete ret.githubAccessToken; // Don't expose access token
         return ret;
       },
     },

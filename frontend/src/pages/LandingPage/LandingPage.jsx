@@ -6,12 +6,14 @@ import { getUser } from "../../services/authService";
 export default function LandingPage() {
   const navigate = useNavigate();
   const user = getUser();
+  const apiBaseUrl = import.meta.env.DEV ? 'http://localhost:3000' : '';
 
-  function handleAnalyze(_analysis, repoUrl) {
+  function handleAnalyze(repoInfo, repoUrl) {
     if (!user) {
-      navigate(`/signup?next=${encodeURIComponent(repoUrl)}`);
+      localStorage.setItem('pendingRepoUrl', repoUrl);
+      window.location.href = `${apiBaseUrl}/api/auth/github`;
     } else {
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { repoUrl, repoInfo } });
     }
   }
 

@@ -24,12 +24,11 @@ export default function RepoAnalyzer({ onAnalyze, compact = false }) {
       }
 
       const [owner, repoName] = pathParts;
-      const response = await gitService.analyzeRepo({ owner, repoName });
-      onAnalyze(response, repoUrl);
+      onAnalyze({ owner, repoName }, repoUrl);
       setRepoUrl("");
     } catch (err) {
       setError(err.message);
-      console.error("Analysis error:", err);
+      // Analysis error
     } finally {
       setLoading(false);
     }
