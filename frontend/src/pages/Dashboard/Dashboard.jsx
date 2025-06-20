@@ -66,6 +66,13 @@ export default function Dashboard() {
     
             const analysis = await gitService.analyzeRepo({ owner, repoName });
             setRepoData(analysis);
+            // Ensure the analyzed repo appears in the sidebar list
+            if (analysis.savedRepo) {
+              setRepos((prev) => {
+                const exists = prev.some((r) => r._id === analysis.savedRepo._id);
+                return exists ? prev : [...prev, analysis.savedRepo];
+              });
+            }
             setCurrentPath("");
             setSelectedFile(null);
             setFileContent(null);
@@ -92,6 +99,13 @@ export default function Dashboard() {
       const analysis = await gitService.analyzeRepo({ owner, repoName });
 
       setRepoData(analysis);
+      // Ensure the analyzed repo appears in the sidebar list
+      if (analysis.savedRepo) {
+        setRepos((prev) => {
+          const exists = prev.some((r) => r._id === analysis.savedRepo._id);
+          return exists ? prev : [...prev, analysis.savedRepo];
+        });
+      }
       setCurrentPath("");
       setSelectedFile(null);
       setFileContent(null);
@@ -106,6 +120,13 @@ export default function Dashboard() {
   
       const analysis = await gitService.analyzeRepo(repoInfo);
       setRepoData(analysis);
+      // Ensure the analyzed repo appears in the sidebar list
+      if (analysis.savedRepo) {
+        setRepos((prev) => {
+          const exists = prev.some((r) => r._id === analysis.savedRepo._id);
+          return exists ? prev : [...prev, analysis.savedRepo];
+        });
+      }
       setCurrentPath("");
       setSelectedFile(null);
       setFileContent(null);
