@@ -8,8 +8,10 @@ export default function NavBar() {
   const user = getUser()
 
   function handleLogOut() {
-    logOut()
-    navigate("/")
+    logOut();
+    navigate("/");
+    // Reload to ensure top-level user state resets
+    window.location.reload();
   }
 
   return (

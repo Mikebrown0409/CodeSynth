@@ -1,180 +1,88 @@
-# CodeSynth 
+# CodeSynth
 
-A modern web application for analyzing GitHub repositories and detecting lint issues with GitHub App integration.
+![CodeSynth Landing Screenshot](./frontend/public/screenshots/LandingPage.jpeg)
 
+## Description
+
+**CodeSynth** is a Git-Hub–integrated code-quality dashboard that lets developers instantly lint any public repository without cloning it locally. Authenticate with GitHub, pick a repository, and receive a grouped summary of ESLint issues, per-file details, and quick-fix suggestions. CodeSynth was built to give engineering students and professionals a friction-free way to gauge code health and learn best practices.
+
+![CodeSynth Dashboard Screenshot](./frontend/public/screenshots/DashboardPage.jpeg)
+
+---
 ## Features
 
-- **GitHub OAuth Integration**: Seamless authentication with GitHub accounts
-- **Repository Analysis**: Analyze any GitHub repository for code quality issues
-- **File Tree Navigation**: Browse repository structure with intuitive navigation
-- **Lint Issue Detection**: Comprehensive ESLint analysis with grouped results
-- **Auto-Fix Preview**: See potential fixes for lint issues before applying
-- **Commit Integration**: Future support for auto-committing fixes to repositories
-- **Dark Theme**: Modern dark interface with shadcn/ui components
-- **Real-time Updates**: Efficient caching based on repository commit SHA
-- **Enhanced Workflow**: Direct repo analysis from landing page with OAuth flow
+* **GitHub OAuth** – one-click sign-in with GitHub.
+* **Repository Analyzer** – fetches repo contents through the GitHub API and performs in-memory ESLint analysis.
+* **Persistent Dashboard** – save, revisit, or delete analyzed repositories (full CRUD).
+* **File Tree & Preview** – navigate directories, view file contents, and see inline lint messages.
+* **JWT-secured API** – stateless communication between React front-end and Express back-end.
+* **Responsive UI** – Tailwind CSS + shadcn/ui ensure a cohesive theme on any screen size.
+* **Deployed on Heroku** – live demo available 24 × 7.
 
-## Tech Stack
-
-### Frontend
-- **React 19** - Latest React with concurrent features
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Beautiful, accessible UI components
-- **Lucide React** - Modern icon library
-- **React Syntax Highlighter** - Code syntax highlighting
-- **React Router** - Client-side routing
-
-### Backend
-- **Node.js & Express** - Server framework
-- **MongoDB & Mongoose** - Database and ODM
-- **JWT Authentication** - Secure token-based auth
-- **GitHub API (Octokit)** - Repository and user data access
-- **ESLint Integration** - Code analysis and auto-fixing
-- **Express Sessions** - OAuth state management
-
+---
 ## Getting Started
 
-### Prerequisites
-- Node.js 16+
-- MongoDB instance
-- GitHub App credentials (for OAuth)
+### Live Application
+Check out CodeSynth! → **https://codesynth-b0400ce4d819.herokuapp.com**
 
-### Installation
+### Planning Materials
+All user stories, ERD, and wireframes are tracked on our [Trello Board](https://trello.com/b/nN0c4lYN/codesynth)
 
-```bash
-# Install dependencies
-npm install
+### Repositories
+* **Front-End & Back-End (monorepo)** – <https://github.com/Mikebrown0409/CodeSynth>
 
-# Install frontend dependencies
-cd frontend && npm install
-
-# Edit .env with your configuration
-```
-
-### Environment Variables
-
-```env
-# Database
-DATABASE_URL=mongodb://localhost:27017/codesynth
-
-# JWT Secret
-SECRET=your-secret-key-here
-
-# GitHub Personal Access Token (fallback)
-GITHUB_ACCESS_TOKEN=your-github-token-here
-
-# GitHub App Configuration
-GITHUB_CLIENT_ID=your-github-app-client-id
-GITHUB_CLIENT_SECRET=your-github-app-client-secret
-
-# Frontend URL (for OAuth redirects)
-FRONTEND_URL=http://localhost:5173
-
-# Session Secret (for OAuth state)
-SESSION_SECRET=your-session-secret-here
-
-# Environment
-NODE_ENV=development
-```
-
-### GitHub App Setup
-
-1. **Create a GitHub App** at https://github.com/settings/apps/new
-2. **Configure the following settings**:
-   - **Homepage URL**: `http://localhost:5173` (or your domain)
-   - **Callback URL**: `http://localhost:5173/api/auth/github/callback`
-   
-3. **Set Permissions**:
-   - **Repository permissions**:
-     - Contents: Read & Write
-     - Metadata: Read
-     - Pull requests: Read & Write
-     - Issues: Read
-   - **Account permissions**:
-     - Email addresses: Read
-
-4. **Subscribe to Events** (future use):
-   - installation
-   - installation_repositories
-   - push
-
-5. **Copy your Client ID and Client Secret** to your `.env` file
-
-### Development
+### Local Development
 
 ```bash
-# Start backend server
-npm start
+# Clone the repo
+$ git clone https://github.com/Mikebrown0409/CodeSynth.git
+$ cd CodeSynth
 
-# Start frontend development server (in another terminal)
-cd frontend && npm run dev
+# Install server deps
+$ npm install
+
+# Install front-end deps
+$ cd frontend && npm install && cd ..
+
+# Copy environment templates and fill in your secrets
+$ cp .env.example .env           # backend
+$ cd frontend && cp .env.example .env && cd ..
+
+# Start dev servers concurrently (backend :3000, Vite :5173)
+$ npm run dev
 ```
 
-### Production Deployment
+---
+## Technologies Used
 
-```bash
-# Build the application
-npm run build
+| Layer | Tech |
+|-------|------|
+| **Front-End** | React (Vite), React Router v6, TailwindCSS, shadcn/ui, Lucide Icons |
+| **Back-End** | Node.js, Express, Mongoose, Octokit REST, ESLint, JSON Web Tokens |
+| **Database** | MongoDB Atlas |
+| **Auth** | GitHub OAuth (Authorization Code) + express-session (state) + JWT |
+| **Dev Ops** | ESLint, Prettier, GitGuardian secret scanning |
+| **Deployment** | Heroku |
 
-# Start production server
-npm start
-```
+---
+## Next Steps
 
-## Enhanced User Workflow
+1. **Commit Auto-Fixes** – push ESLint `--fix` patches directly to GitHub via PR.
+2. **Notes / Comments** – second data entity allowing users to annotate code smells.
+3. **Dark-Mode Toggle** – remember user preference in `localStorage`.
+4. **Accessibility Audit** – AA contrast, focus rings, keyboard navigation.
+5. **Search Bar** – quickly jump to files or error types.
 
-1. **Landing Page**: Users enter a GitHub repository URL
-2. **OAuth Flow**: New users are redirected to GitHub for authentication
-3. **Dashboard**: Users land in dashboard with their repository pre-analyzed
-4. **Analysis View**: Three-panel layout showing:
-   - Repository list and analyzer (left sidebar)
-   - File tree and lint summary (middle panel)
-   - File content with grouped lint issues (right panel)
-5. **Auto-Fix Preview**: Click "Auto Fix" to see potential fixes
-6. **Future**: One-click commit fixes back to user's repository
+---
+## Attributions
 
-## Architecture
+* **shadcn/ui** – React component library (<https://ui.shadcn.com>)
+* **Lucide Icons** – MIT-licensed icon set (<https://lucide.dev>)
+* **Octokit** – GitHub REST client (<https://github.com/octokit>)
+* **RealFaviconGenerator.net** – favicon bundle
+* **GitGuardian** – secret-leak monitoring
 
-### Authentication Flow
-- GitHub OAuth 2.0 with state verification
-- JWT tokens for session management
-- User GitHub access tokens stored securely
-- Seamless integration with existing username/password system
+---
+## License
 
-### Repository Analysis
-- Fetches entire file tree via GitHub Git API
-- In-memory ESLint analysis (no repository cloning)
-- Commit-based caching for performance
-- Grouped lint results by rule for better UX
-
-### Future Features
-- **Auto-commit fixes**: Direct integration with user repositories
-- **Pull request creation**: Automated PR generation for fixes
-- **Webhook integration**: Real-time updates on repository changes
-- **Team collaboration**: Shared repository analysis and fix management
-
-## UI Components
-
-The application uses a custom implementation of shadcn/ui components with:
-
-- **Dark-only theme** for better code readability
-- **Card-based layouts** for organized content sections
-- **Badge components** for status indicators and counts
-- **Button variants** for different actions and states
-- **Input components** with proper focus and validation states
-
-## Design System
-
-All styling follows a consistent design system with:
-
-- HSL-based color variables for theme consistency
-- Consistent spacing and typography scales
-- Accessible focus states and color contrasts
-- Responsive design principles
-- Modern glassmorphism effects with backdrop blur
-
-## Deployment
-
-The application is deployed on Heroku at: https://codesynth-b0400ce4d819.herokuapp.com/
-
-For production deployment, ensure all environment variables are properly configured and the GitHub App callback URLs point to your production domain. 
+Released under the MIT License. See [LICENSE](LICENSE) for details. 
