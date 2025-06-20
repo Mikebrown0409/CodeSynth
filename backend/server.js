@@ -10,6 +10,8 @@ require("dotenv").config();
 // Connect to the database
 require("./db");
 
+app.set("trust proxy", 1); // Trust first proxy so secure cookies work behind Heroku
+
 app.use(logger("dev"));
 
 // Session middleware for OAuth state
