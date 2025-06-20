@@ -178,7 +178,7 @@ module.exports = {
   index,
   analyzeRepository,
   getFileContent,
-  delete: deleteRepo,
+  deleteRepo,
   fixFile,
   commitFixes,
 };

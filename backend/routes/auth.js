@@ -5,6 +5,8 @@ const crypto = require("crypto");
 
 // All paths start with '/api/auth'
 
+// Traditional auth routes removed - using GitHub OAuth only
+
 // GitHub OAuth routes
 // GET /api/auth/github - Initiate GitHub OAuth
 router.get("/github", (req, res) => {

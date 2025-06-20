@@ -95,7 +95,7 @@ export default function FileContent({ file, content, owner, repo }) {
                 Lint Issues ({Object.keys(groupedLint).length} rules)
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 max-h-80 overflow-y-auto">
+            <CardContent className="space-y-2">
               {Object.entries(groupedLint).map(([key, group]) => {
                 const isOpen = openRule === key;
                 const isError = group.severity === 2;

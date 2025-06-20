@@ -273,7 +273,7 @@ export default function Dashboard() {
                     >With Issues</Button>
                   </div>
                 )}
-                 {repoData.lintSummary && (
+                {repoData.lintSummary && (
                   <RepoLintSummary
                     summary={repoData.lintSummary}
                     messages={repoData.lintMessages || []}

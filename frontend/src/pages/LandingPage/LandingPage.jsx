@@ -10,7 +10,9 @@ export default function LandingPage() {
 
   function handleAnalyze(repoInfo, repoUrl) {
     if (!user) {
+      // Store the repo URL for after OAuth
       localStorage.setItem('pendingRepoUrl', repoUrl);
+      // Redirect to GitHub OAuth
       window.location.href = `${apiBaseUrl}/api/auth/github`;
     } else {
       navigate("/dashboard", { state: { repoUrl, repoInfo } });

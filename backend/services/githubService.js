@@ -1,6 +1,5 @@
 const { Octokit } = require("@octokit/rest");
 const { ESLint } = require("eslint");
-const pLimit = require("p-limit");
 
 // Initialize Octokit 
 const octokit = new Octokit({
@@ -182,7 +181,7 @@ function groupMessagesByRule(messages, sampleCap = 5) {
 
 // Lint an entire repository in-memory (no git clone required)
 async function lintRepository(owner, repo) {
-  // Dynamic import for p-limit v4 (ES module)
+  // Requires a dynamic import for module
   const { default: pLimit } = await import('p-limit');
   
   const allFiles = await listRepositoryFiles(owner, repo);
@@ -249,7 +248,7 @@ async function getFileWithFix(owner, repo, path) {
   };
 }
 
-// Commit fixed code back to the repository (future feature)
+// Commit fixed code back to the repository (in the works feature)
 async function commitFixes(owner, repo, path, fixedContent, userToken, branch = 'main') {
   const userOctokit = new Octokit({ auth: userToken });
   

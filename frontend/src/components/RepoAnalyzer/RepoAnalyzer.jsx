@@ -24,6 +24,8 @@ export default function RepoAnalyzer({ onAnalyze, compact = false }) {
       }
 
       const [owner, repoName] = pathParts;
+      // Pass the parsed repo info to parent component
+      // Parent will handle authentication and API call
       onAnalyze({ owner, repoName }, repoUrl);
       setRepoUrl("");
     } catch (err) {
